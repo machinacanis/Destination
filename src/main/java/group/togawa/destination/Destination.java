@@ -1,10 +1,14 @@
 package group.togawa.destination;
 
 import com.mojang.logging.LogUtils;
+import group.togawa.destination.command.Command;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -20,7 +24,7 @@ public class Destination {
 
     public Destination(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
-        modEventBus.addListener(this::commonSetup); // 注册通用设置事件监听器
+        modEventBus.addListener(this::commonSetup);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -38,5 +42,9 @@ public class Destination {
         );
         LOGGER.info(rdMessage);
         LOGGER.info("Thank you for using TaCZ: Destination!");
+    }
+
+    public static ResourceLocation asResource(String path) {
+        return ResourceLocation.fromNamespaceAndPath(ID, path);
     }
 }
