@@ -20,9 +20,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
-public class AddPerkCommand {
+/**
+ * Command to remove a perk from the item (gun or attachment) held in the main hand of target entities.
+ *
+ * Usage: /removePerk <targets> <perk>
+ */
+public class RemovePerkCommand {
 
-    private static final String NAME = "addPerk";
+    private static final String NAME = "removePerk";
     private static final String ENTITY = "target";
     private static final String PERK = "perk";
 
@@ -34,12 +39,12 @@ public class AddPerkCommand {
         RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> perk =
             Commands.argument(PERK, ResourceLocationArgument.id());
 
-        command.then(entities.then(perk.executes(AddPerkCommand::addPerk)));
+        command.then(entities.then(perk.executes(RemovePerkCommand::removePerk)));
 
         return command;
     }
 
-    private static int addPerk(CommandContext<CommandSourceStack> context)
+    private static int removePerk(CommandContext<CommandSourceStack> context)
         throws CommandSyntaxException {
         var entities = EntityArgument.getEntities(context, ENTITY);
         int count = 0;
@@ -55,16 +60,19 @@ public class AddPerkCommand {
             if (entity instanceof LivingEntity living) {
                 ItemStack stack = living.getMainHandItem();
                 if (stack.getItem() instanceof IGun) {
-                    // 手持枪械
-                    GunPerkDataAccessor.addPerk(stack, new PerkItem(perk));
-                    count++;
+                    // 手持枪械：仅在该枪上存在该Perk时才执行移除并计数
+                    PerkItem existing = GunPerkDataAccessor.getPerk(stack, perk);
+                    if (existing != null) {
+                        GunPerkDataAccessor.removePerk(stack, perk);
+                        count++;
+                    }
                 } else if (stack.getItem() instanceof IAttachment) {
-                    // 手持配件
-                    AttachmentPerkDataAccessor.addPerk(
-                        stack,
-                        new PerkItem(perk)
-                    );
-                    count++;
+                    // 手持配件：仅在该配件上存在该Perk时才执行移除并计数
+                    PerkItem existing = AttachmentPerkDataAccessor.getPerk(stack, perk);
+                    if (existing != null) {
+                        AttachmentPerkDataAccessor.removePerk(stack, perk);
+                        count++;
+                    }
                 }
             }
         }

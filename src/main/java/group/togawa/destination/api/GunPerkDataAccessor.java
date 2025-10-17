@@ -65,7 +65,7 @@ public final class GunPerkDataAccessor {
         );
     }
 
-    /** 向枪械添加指定Perk */
+    /** 向枪械的NBT中添加指定Perk */
     public static void addPerk(ItemStack gun, PerkItem perk) {
         List<PerkItem> perks = getPerks(gun);
         if (perks == null) {
@@ -81,6 +81,29 @@ public final class GunPerkDataAccessor {
             }
         }
         perks.add(perk); // 添加新的Perk
+        // 将更新后的Perk列表保存回NBT
+        ListTag perkTags = new ListTag();
+        for (PerkItem p : perks) {
+            CompoundTag tag = new CompoundTag();
+            if (p.PerkId != null) {
+                tag.putString("PerkId", p.PerkId.toString());
+            }
+            tag.putBoolean("Upgraded", p.Upgraded);
+            perkTags.add(tag);
+        }
+        CompoundTag nbt = gun.getOrCreateTag();
+        nbt.put(GUN_PERKS_LIST, perkTags);
+    }
+
+    /** 从枪械的NBT中移除指定ID的Perk */
+    public static void removePerk(ItemStack gun, ResourceLocation perkId) {
+        List<PerkItem> perks = getPerks(gun);
+        if (perks == null) {
+            return; // 如果没有Perk标签，直接返回
+        }
+        perks.removeIf(
+            perk -> perk.PerkId != null && perk.PerkId.equals(perkId) // 移除指定ID的Perk
+        );
         // 将更新后的Perk列表保存回NBT
         ListTag perkTags = new ListTag();
         for (PerkItem p : perks) {

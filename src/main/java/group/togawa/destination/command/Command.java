@@ -19,6 +19,7 @@ public class Command {
 
         // 这里注册子命令
         command.then(AddPerkCommand.get());
+        command.then(RemovePerkCommand.get());
 
         dispatcher.register(command);
     }
